@@ -7,14 +7,13 @@
 
 # stations to process
 path <- 'M:/wq_models/swmp2/raw'
-stats <- unique(gsub('[0-9].*\\.csv$', '', dir(path)))
+stats <- unique(gsub('[0-9][0-9][0-9][0-9]\\.csv$', '', dir(path)))
 
 # setup parallel backend
 cl<-makeCluster(8)
 registerDoParallel(cl)
 strt<-Sys.time()
 
-stats <- stats[1:20]
 # process all stations
 foreach(stat = stats) %dopar% {
   
@@ -39,7 +38,7 @@ foreach(stat = stats) %dopar% {
     save(list = stat, file = paste0('M:/wq_models/SWMP2/proc1/', stat, '.RData'))
     save(list = stat, file = paste0('M:/wq_models/SWMP2/proc2/', stat, '.RData'))
     rm(list = stat)
-    rm(list = tmp)
+    rm('tmp')
   
   # wq, met processing
   } else {
