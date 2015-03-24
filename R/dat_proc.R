@@ -1,9 +1,12 @@
 ######
 # script for processing swmp data - all reserves, stations, data
-# data retrieved from CDMO Nov. 21, 2014
+# data retrieved from CDMO Mar. 23, 2015
+# includes all data from 1995 through 2014
 
 ######
 # process stations, 15 minute step and daily aggs
+
+devtools::load_all('M:/docs/SWMPr')
 
 # stations to process
 path <- 'M:/wq_models/swmp2/raw'
@@ -30,6 +33,7 @@ foreach(stat = stats) %dopar% {
     
     tmp <- rem_reps(tmp)
     
+    # qaqc
     tmp <- qaqc(tmp, qaqc_keep = c(0, 4, 5))
     
     tmp_agg <- tmp
@@ -42,22 +46,23 @@ foreach(stat = stats) %dopar% {
     # setstep to 15
     tmp <- setstep(tmp)
     
-    # keep passed, historical, corrected for all except totprcp
-    # keep only passed for totprcp\
+    # qaqc, keep only passed totprcp
     totprcp <- subset(tmp, select = 'totprcp')
     totprcp <- qaqc(totprcp, qaqc_keep = 0)
-    tmp <- qaqc(tmp, qaqc_keep = c(0))
+    tmp <- qaqc(tmp, qaqc_keep = c(0, 4, 5))
     tmp$totprcp <- totprcp$totprcp
     
     # aggregate by days
     tmp_agg <- aggregate(tmp, by = 'days')
     
     # use daily max for cumprcp
-    cumprcp <- aggregate(tmp, by = 'days', 
-      FUN = function(x) max(x, na.rm = T), 
-      params = 'cumprcp')
-    cumprcp$cumprcp[cumprcp$cumprcp == -Inf] <- NA_real_
-    tmp_agg$cumprcp <- cumprcp$cumprcp
+    if('cumprcp' %in% names(tmp)){
+      cumprcp <- aggregate(tmp, by = 'days', 
+        FUN = function(x) max(x, na.rm = T), 
+        params = 'cumprcp'
+        )
+      tmp_agg$cumprcp <- cumprcp$cumprcp
+    }
   
   }
   
@@ -67,7 +72,7 @@ foreach(stat = stats) %dopar% {
     # setstep to 15
     tmp <- setstep(tmp)
     
-    # keep passed, historical, corrected for all except totprcp
+    # keep passed
     tmp <- qaqc(tmp, qaqc_keep = c(0, 4, 5))
     
     # aggregate by days
