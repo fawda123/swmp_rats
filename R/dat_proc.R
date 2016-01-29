@@ -1,7 +1,7 @@
 ######
 # script for processing swmp data - all reserves, stations, data
-# data retrieved from CDMO Mar. 23, 2015
-# includes all data from 1995 through 2014
+# data retrieved from CDMO Jan. 29, 2015
+# includes all data from 1995 through 2015
 
 ######
 # process stations, 15 minute step and daily aggs
@@ -13,7 +13,7 @@ path <- 'M:/wq_models/swmp2/raw'
 stats <- unique(gsub('[0-9][0-9][0-9][0-9]\\.csv$', '', dir(path)))
 
 # setup parallel backend
-cl<-makeCluster(8)
+cl<-makeCluster(7)
 registerDoParallel(cl)
 strt<-Sys.time()
 
@@ -31,10 +31,9 @@ foreach(stat = stats) %dopar% {
   # nut processing
   if(grepl('nut$', stat)){
     
-    tmp <- rem_reps(tmp)
-    
     # qaqc
     tmp <- qaqc(tmp, qaqc_keep = c(0, 4, 5))
+    tmp <- rem_reps(tmp)
     
     tmp_agg <- tmp
     
@@ -53,11 +52,11 @@ foreach(stat = stats) %dopar% {
     tmp$totprcp <- totprcp$totprcp
     
     # aggregate by days
-    tmp_agg <- aggregate(tmp, by = 'days')
+    tmp_agg <- aggreswmp(tmp, by = 'days')
     
     # use daily max for cumprcp
     if('cumprcp' %in% names(tmp)){
-      cumprcp <- aggregate(tmp, by = 'days', 
+      cumprcp <- aggreswmp(tmp, by = 'days', 
         FUN = function(x) max(x, na.rm = T), 
         params = 'cumprcp'
         )
@@ -76,7 +75,7 @@ foreach(stat = stats) %dopar% {
     tmp <- qaqc(tmp, qaqc_keep = c(0, 4, 5))
     
     # aggregate by days
-    tmp_agg <- aggregate(tmp, by = 'days')
+    tmp_agg <- aggreswmp(tmp, by = 'days')
     
   }
     
