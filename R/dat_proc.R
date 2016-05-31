@@ -20,7 +20,7 @@ strt<-Sys.time()
 # process all stations
 foreach(stat = stats) %dopar% {
   
-  sink('C:/Users/mbeck/Desktop/log.txt')
+  sink('log.txt')
   cat(stat, which(stat == stats), 'of', length(stats), '\n')
   print(Sys.time()-strt)
   sink()
