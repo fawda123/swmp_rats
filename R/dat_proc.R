@@ -9,11 +9,11 @@
 devtools::load_all('M:/docs/SWMPr')
 
 # stations to process
-path <- 'M:/wq_models/swmp2/raw'
+path <- 'ignore/raw'
 stats <- unique(gsub('[0-9][0-9][0-9][0-9]\\.csv$', '', dir(path)))
 
 # setup parallel backend
-cl<-makeCluster(7)
+cl<-makeCluster(4)
 registerDoParallel(cl)
 strt<-Sys.time()
 
@@ -81,13 +81,13 @@ foreach(stat = stats) %dopar% {
     
   # assign tmp to object, save, clear memory
   assign(stat, tmp)
-  save(list = stat, file = paste0('M:/wq_models/SWMP2/proc1/', stat, '.RData'))
+  save(list = stat, file = paste0('ignore/proc1/', stat, '.RData'))
   rm(list = stat)
   rm('tmp')
   
   # assign tmp_agg to object, save, clear memory
   assign(stat, tmp_agg)
-  save(list = stat, file = paste0('M:/wq_models/SWMP2/proc2/', stat, '.RData'))
+  save(list = stat, file = paste0('ignore/proc2/', stat, '.RData'))
   rm(list = stat)
   rm('tmp_agg')
 
