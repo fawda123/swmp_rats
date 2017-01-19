@@ -6,19 +6,21 @@
 ######
 # process stations, 15 minute step and daily aggs
 
-devtools::load_all('M:/docs/SWMPr')
+library(SWMPr)
+library(doParallel)
+library(foreach)
 
 # stations to process
 path <- 'ignore/raw'
 stats <- unique(gsub('[0-9][0-9][0-9][0-9]\\.csv$', '', dir(path)))
 
 # setup parallel backend
-cl<-makeCluster(4)
+cl<-makeCluster(6)
 registerDoParallel(cl)
 strt<-Sys.time()
 
 # process all stations
-foreach(stat = stats) %dopar% {
+foreach(stat = stats, .packages = 'SWMPr') %dopar% {
   
   sink('log.txt')
   cat(stat, which(stat == stats), 'of', length(stats), '\n')
