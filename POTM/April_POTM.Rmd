@@ -1,5 +1,5 @@
 ---
-title: "April POTM: Predicting tidal components in R"
+title: "April POTM: Predicting tides in R"
 author: "Marcus W Beck"
 output: 
   prettydoc::html_pretty:
@@ -15,17 +15,17 @@ knitr::opts_chunk$set(echo = TRUE)
 
 Skip to [TL/DR](#tldr)....
 
-Water movement in estuaries is affected by many processes acting across space and time.  Tidal exchange with the ocean is an important hydrodynamic process that can define several characteristics of an estuary.  Physical flushing rates and water circulation are often controlled by tidal advection, whereas chemical and biological components are affected by the flux of dissolved or particulate components with changes in the tide.  As such, describing patterns of tidal variation is useful for characterizing many estuarine processes.  
+Water movement in estuaries is affected by many processes acting across space and time.  Tidal exchange with the ocean is an important hydrodynamic process that can define several characteristics of an estuary.  Physical flushing rates and water circulation are often controlled by tidal advection, whereas chemical and biological components are affected by the flux of dissolved or particulate components with changes in the tide.  As such, describing patterns of tidal variation is a common objective of coastal researchers and environmental managers.
 
-Tidal predictions are nothing new.  A clever analog approach has been around since the late 1800s.  The [tide-predicting maching](https://en.wikipedia.org/wiki/Tide-predicting_machine) represents the tide as the summation of harmonics with different periods and amplitudes.  Think of a continuous line plot where the repeating pattern is linked to a rotating circle,  Representing the line in two-dimensions from the roating circle creates a sine wave.  We can create the same plot by adding the output of two or more rotating disks, where each disk varies in diameter and rate of rotation.  This is directly analogous to adding sine waves with different amplitudes (height) and periods (distance between peaks).  The tide-predicting machine is nothing more than a set of rotating circles linked to a single graph as the sum of the rotations from all circles. Here's a fantastic [digital representation](http://www.ams.org/samplings/feature-column/fcarc-tidesiii3) of the tide-predicting machine:
+Tidal predictions are nothing new.  A clever analog approach has been around since the late 1800s.  The [tide-predicting machine](https://en.wikipedia.org/wiki/Tide-predicting_machine) represents the tide as the summation of waves with different periods and amplitudes.  Think of a continuous line plot where the repeating pattern is linked to a rotating circle,  Representing the line in two-dimensions from the rotating circle creates a sine wave with the amplitude equal to the radius of the circle.  A more complex plot can be created by adding the output of two or more rotating disks, where each disk varies in radius and rate of rotation.  The tide-predicting machine is nothing more than a set of rotating disks linked to a single graph as the sum of the rotations from all disks. Here's a fantastic [digital representation](http://www.ams.org/samplings/feature-column/fcarc-tidesiii3) of the tide-predicting machine:
 
 ![](imgs/tidemachine.PNG)
 
-Tides are caused primarily by the gravitational pull of the sun and moon on the earth's surface.  The elliptical orbits of both the moon around the earth and the earth around the sun produce periodic but unequal forces that influence water movement.  These forces combined with local surface topography and large-scale circulation patterns from uneven heating of the earth's surface lead to the variation of tidal patterns across the globe.  Although complex, these periodic patterns can be characterized as the summation of sine waves.  This was the objecive of the earlier tide-predicting machines.  Fortunately for us, modern software (i.e., R) provides us with a simpler and less expensive approach based on harmonic regression.  
+Tides are caused primarily by the gravitational pull of the sun and moon on the earth's surface.  The elliptical orbits of both the moon around the earth and the earth around the sun produce periodic but unequal forces that influence water movement.  These forces combined with local surface topography and large-scale circulation patterns from uneven heating of the earth's surface lead to the variation of tidal patterns across the globe.  Although complex, these periodic patterns can be characterized as the summation of sine waves, where one wave represents the effect of a single physical process (e.q., diurnal pull of the moon).  Describing these forces was the objecive of the earlier tide-predicting machines.  Fortunately for us, modern software (i.e., R) provides us with a simpler and less expensive approach based on harmonic regression.  
 
-# Aproach 
+# Approach 
 
-We'll create our own sine waves and add them up to demonstrate complexity from addition.  All sine waves follow the general form y as a function of x:
+We'll create and sum our own sine waves to demonstrate complexity from addition.  All sine waves follow the general form y as a function of x:
 
 $$
 y = \alpha + \beta\sin\left(2\pi f x + \Phi\right)
@@ -56,7 +56,7 @@ waves <- function(time_in, alpha = 0, beta = 1, freq = 24, phi = 0){
 	}
 ```
 
-The default arguments will return a sine wave with an amplitude of one and frequency of one wave per 24 hours.  Two additional time series are created that vary these two parameters.
+The default arguments will return a sine wave with an amplitude of one meter and frequency of one wave per 24 hours.  Two additional time series are created that vary these two parameters.
 ```{r}
 # input time series for two weeks, 15 minute time step
 x <- as.POSIXct(c('2017-04-01', '2017-04-15'))
@@ -88,7 +88,7 @@ ggplot(dat, aes(x = x, y = val)) +
   theme_bw()
 ```
 
-The important piece of information we get from the plot is that adding simple sine waves can create complex patterns. As a general rule, bout 83% of the variation in tides is created by seven different harmonic components that, when combined, lead to the complex patterns we observe from monitoring data.  These components are described as being of lunar or solar original and relative periods occuring either once or twice daily.  For example, the so-called 'M2' component is typically the dominant tidal wave caused by the moon, twice daily.  The periods of tidal components are constant across locations but the relative strength (amplitudes) vary considerably.
+The important piece of information we get from the plot is that adding simple sine waves can create complex patterns. As a general rule, about 83% of the variation in tides is created by seven different harmonic components that, when combined, lead to the complex patterns we observe from monitoring data.  These components are described as being of lunar or solar original and relative periods occuring either once or twice daily.  For example, the so-called 'M2' component is typically the dominant tidal wave caused by the moon, twice daily.  The periods of tidal components are constant across locations but the relative strength (amplitudes) vary considerably.
 
 ![](imgs/maincomponents.PNG)
 
@@ -101,7 +101,7 @@ library(oce)
 # clean, one hour time step, subset, fill gaps
 dat <- qaqc(apadbwq) %>% 
   setstep(timestep = 60) %>% 
-  subset(., subset = c('2013-01-01 0:0', '2013-12-31 0:0'), select = 'depth') %>% 
+  subset(subset = c('2013-01-01 0:0', '2013-12-31 0:0'), select = 'depth') %>% 
   na.approx(maxgap = 1e6)
 ```
 
@@ -149,7 +149,7 @@ ggplot(toplo, aes(x = time, y = estimate, group = component)) +
   theme_bw() 
 ```
 
-All tidal components can of course be estimated together.  By default, the tidem function estimates all 69 tidal components. Looking at our constituents of interests shows the same estimated amplitudes in the plot above.
+All tidal components can of course be estimated together.  By default, the tidem function estimates all 69 tidal components. Looking at our components of interest shows the same estimated amplitudes in the plot above.
 ```{r, message = F, warning = F}
 # estimate all components together
 mod <- tidem(t = datsl)
@@ -176,7 +176,7 @@ ggplot(dat, aes(x = datetimestamp, y = depth)) +
   theme_bw() 
 ```
 
-The fit is not perfect but this could be from several reasons, none of which are directly related to the method - instrument drift, fouling, water movement from non-tidal sources, etc.  The real value of the model is we can use it to fill missing observations in tidal time series or to predict future observations.  We also get reaonable estimates of the main tidal components, i.e., which physical forces are really driving the tide and how large are the contributions.  For example, our data from Apalachicola Bay showed that the tide is driving primarily by the M2, K2, and O1 components, where each had relative amplitudes of about 0.1 meters.  This is consistent with general patterns of micro-tidal systems in the Gulf of Mexico.  Comparing tidal components in other geographic locations would produce very differents results both in the estimated amplitudes and the dominant components.
+The fit is not perfect but this could be from several reasons, none of which are directly related to the method - instrument drift, fouling, water movement from non-tidal sources, etc.  The real value of the model is we can use it to fill missing observations in tidal time series or to predict future observations.  We also get reasonable estimates of the main tidal components, i.e., which physical forces are really driving the tide and how large are the contributions.  For example, our data from Apalachicola Bay showed that the tide is driven primarily by the M2, K2, and O1 components, where each had relative amplitudes of about 0.1 meter.  This is consistent with general patterns of micro-tidal systems in the Gulf of Mexico.  Comparing tidal components in other geographic locations would produce very differents results, both in the estimated amplitudes and the dominant components.
 
 # TL/DR {#tldr}
 
