@@ -30,7 +30,7 @@ We'll create and sum our own sine waves to demonstrate complexity from addition.
 $$
 y = \alpha + \beta\sin\left(2\pi f x + \Phi\right)
 $$
-where the amplitude of the wave is $\beta$ and the frequency (or 1 / period) is $f$. The parameters $\alpha$ and $\Phi$ represent scalar shifts in the curve up/down and left/right, respectively. We can easily create a function in R to simulate sine waves with different characteristics. This function takes the parameters from the above equation as arguments and returns a sine wave ($y$) equal in length to the input time series ($x$).  The $\alpha$ and $\beta$ are interpreted as units of wave height (e.g., meters) and $f$ and \$Phi$ are in hours.
+where the amplitude of the wave is $\beta$ and the frequency (or 1 / period) is $f$. The parameters $\alpha$ and $\Phi$ represent scalar shifts in the curve up/down and left/right, respectively. We can easily create a function in R to simulate sine waves with different characteristics. This function takes the parameters from the above equation as arguments and returns a sine wave ($y$) equal in length to the input time series ($x$).  The $\alpha$ and $\beta$ are interpreted as units of wave height (e.g., meters) and $f$ and $\Phi$ are in hours.
 ```{r}
 # function for creating sine wave
 waves <- function(time_in, alpha = 0, beta = 1, freq = 24, phi = 0){
