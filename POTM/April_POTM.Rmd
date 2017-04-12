@@ -11,26 +11,27 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+# Overview 
+
+Skip to [TL/DR](#tldr)....
+
 Water movement in estuaries is affected by many processes acting across space and time.  Tidal exchange with the ocean is an important hydrodynamic process that can define several characteristics of an estuary.  Physical flushing rates and water circulation are often controlled by tidal advection, whereas chemical and biological components are affected by the flux of dissolved or particulate components with changes in the tide.  As such, describing patterns of tidal variation is useful for characterizing many estuarine processes.  
 
-Tidal predictions are nothing new.  A clever analog approach has been around since the late 1800s.  The [tide-predicting maching](https://en.wikipedia.org/wiki/Tide-predicting_machine) represents the tide as the summation of harmonics with different periods and amplitudes.  Think of a continuous line plot where the repeating pattern is linked to a rotating circle,  Representing the line in two-dimensions from the roating circle creates a sine wave.  We can create the same plot by adding the output of two or more rotating circles, where each circle can vary in its diameter and rate of rotation.  This is directly analogous to adding sine waves with different amplitudes (height) and periods (distance between peaks).  The tide-predicting machine is nothing more than a set of rotating circles linked to a single graph as the sum of the rotations from all circles. Here's a fantastic [digital representation](http://www.ams.org/samplings/feature-column/fcarc-tidesiii3) of the tide-predicting machine:
+Tidal predictions are nothing new.  A clever analog approach has been around since the late 1800s.  The [tide-predicting maching](https://en.wikipedia.org/wiki/Tide-predicting_machine) represents the tide as the summation of harmonics with different periods and amplitudes.  Think of a continuous line plot where the repeating pattern is linked to a rotating circle,  Representing the line in two-dimensions from the roating circle creates a sine wave.  We can create the same plot by adding the output of two or more rotating disks, where each disk varies in diameter and rate of rotation.  This is directly analogous to adding sine waves with different amplitudes (height) and periods (distance between peaks).  The tide-predicting machine is nothing more than a set of rotating circles linked to a single graph as the sum of the rotations from all circles. Here's a fantastic [digital representation](http://www.ams.org/samplings/feature-column/fcarc-tidesiii3) of the tide-predicting machine:
 
 ![](imgs/tidemachine.PNG)
 
 Tides are caused primarily by the gravitational pull of the sun and moon on the earth's surface.  The elliptical orbits of both the moon around the earth and the earth around the sun produce periodic but unequal forces that influence water movement.  These forces combined with local surface topography and large-scale circulation patterns from uneven heating of the earth's surface lead to the variation of tidal patterns across the globe.  Although complex, these periodic patterns can be characterized as the summation of sine waves.  This was the objecive of the earlier tide-predicting machines.  Fortunately for us, modern software (i.e., R) provides us with a simpler and less expensive approach based on harmonic regression.  
 
-We'll create our own sine waves and add them up to demonstrate complexity from addition.  A simple way to do this in R is use the form:
+# Aproach 
+
+We'll create our own sine waves and add them up to demonstrate complexity from addition.  All sine waves follow the general form y as a function of x:
 
 $$
 y = \alpha + \beta\sin\left(2\pi f x + \Phi\right)
 $$
-where the amplitude of the wave is $\beta$ and the frequency (or 1 / period) is $f$. The parameters $\alpha$ and $\Phi$ represent scalar shifts in the curve up/down and left/right, respectively. Multiple sine waves can be created using a function. This function takes the parameters from the above equation as arguments and returns a sine wave equal in length to the input time series.  The $\alpha$ and $\beta$ are interpreted as units of wave height (e.g., m) and $\f$ and \$Phi$ are in hours.  The default argumetns will return a sine wave with an amplitude of one and frequency of one wave per 24 hours.  Two additional time series are created that vary these two parameters.
+where the amplitude of the wave is $\beta$ and the frequency (or 1 / period) is $f$. The parameters $\alpha$ and $\Phi$ represent scalar shifts in the curve up/down and left/right, respectively. We can easily create a function in R to simulate sine waves with different characteristics. This function takes the parameters from the above equation as arguments and returns a sine wave ($y$) equal in length to the input time series ($x$).  The $\alpha$ and $\beta$ are interpreted as units of wave height (e.g., meters) and $f$ and \$Phi$ are in hours.
 ```{r}
-
-# input time series for two weeks, 15 minute time step
-x <- as.POSIXct(c('2017-04-01', '2017-04-15'))
-x <- seq(x[1], x[2], by = 60 * 15)
-
 # function for creating sine wave
 waves <- function(time_in, alpha = 0, beta = 1, freq = 24, phi = 0){
 
@@ -43,16 +44,23 @@ waves <- function(time_in, alpha = 0, beta = 1, freq = 24, phi = 0){
   phi <- phi / time_step
   
   # get input values to cos func
-	in_vals <- seq(0, length(time_in), length = length(time_in))
-	in_vals <- in_vals / time_step
+  in_vals <- seq(0, length(time_in), length = length(time_in))
+  in_vals <- in_vals / time_step
   in_vals <- 2 * pi * in_vals * 1 / freq
 
   # wave
-	y <- alpha + beta * sin(in_vals + phi)
+  y <- alpha + beta * sin(in_vals + phi)
 	
 	return(y)
 	
 	}
+```
+
+The default arguments will return a sine wave with an amplitude of one and frequency of one wave per 24 hours.  Two additional time series are created that vary these two parameters.
+```{r}
+# input time series for two weeks, 15 minute time step
+x <- as.POSIXct(c('2017-04-01', '2017-04-15'))
+x <- seq(x[1], x[2], by = 60 * 15)
 
 # get three sine waves
 # a: default
@@ -65,6 +73,7 @@ c <- waves(x, beta = 2, f = 12)
 
 We can combine all three waves in the same data object, take the summation, and plot to see how it looks.
 ```{r, message = F, fig.height = 7, fig.width = 7}
+# for data munging and plotting
 library(tidyverse)
 
 # get sum of all y values, combine to single object
@@ -79,7 +88,7 @@ ggplot(dat, aes(x = x, y = val)) +
   theme_bw()
 ```
 
-The important piece of information we get from the plot is that adding simple sine waves can create complex patterns. About 83% of the variation in tides is created by seven different harmonic components that, when combined, lead to the complex patterns we observe from monitoring data.  These components are described as being of lunar or solar original and relative periods occuring either once or twice daily.  The so-called 'M2' component is typically the dominant tidal wave caused by the moon, twice daily.  The periods of tidal components are constant across locations but the relative strength (amplitudes) vary considerably.
+The important piece of information we get from the plot is that adding simple sine waves can create complex patterns. As a general rule, bout 83% of the variation in tides is created by seven different harmonic components that, when combined, lead to the complex patterns we observe from monitoring data.  These components are described as being of lunar or solar original and relative periods occuring either once or twice daily.  For example, the so-called 'M2' component is typically the dominant tidal wave caused by the moon, twice daily.  The periods of tidal components are constant across locations but the relative strength (amplitudes) vary considerably.
 
 ![](imgs/maincomponents.PNG)
 
@@ -102,37 +111,98 @@ datsl <- as.sealevel(elevation = dat$depth, time = dat$datetimestamp)
 plot(datsl)
 ```
 
-We can estimate the components from the table above using tidem.  Here, we estimate each component separately to extract predictions for each, which we then sum to estimate the complete time series.    
+We can create a model to estimate the components from the table above using tidem.  Here, we estimate each component separately to extract predictions for each, which we then sum to estimate the complete time series.    
 ```{r}
+
+# tidal components to estimate
 constituents <- c('M2', 'S2', 'N2', 'K2', 'K1', 'O1', 'P1')
+
+# loop through tidal components, predict each with tidem
 preds <- sapply(constituents, function(x){
   
     mod <- tidem(t = datsl, constituent = x)
-    alph <- mod@data$amplitude[1]
-    predict(mod) - alph
+    pred <- predict(mod)
+    pred - mean(pred)
     
   }) 
 
+# combine prediction, sum, add time data
 predall <- rowSums(preds) + mean(datsl[['elevation']])
-preds <- data.frame(time = datsl[['time']], preds, predall) 
+preds <- data.frame(time = datsl[['time']], preds, Estimated = predall) 
 
 head(preds)
 ```
 
-The fitted model object above returns the estimated parameters for each tidal component, where frequency is the period ($f$ in the above equation), amplitude ($\beta$), and phase ($\Phi$). The Z0 estimate is a constant equal to $\alpha$.  It's also important to remmber that this is a model and the 'misfit' should always be evaluated, represented by root mean square (RMS) in the output.  Although this is not an option from the oce package, we can use the output from the model to reconstruct the estimated tidal components.
+Plotting two weeks from the estimated data shows the results. Note the variation in amplitude between the components. The M2 , K1, and O1 components are the largest at this location.  Also note the clear spring/neap variation in range every two weeks for the combined time series. This complex fort-nightly variation is caused simply by adding the separate sine waves.  
 
-```{r, fig.height = 10, fig.width = 8}
-
+```{r, fig.height = 10, fig.width = 8, warning = F}
+# prep for plot
 toplo <- preds %>% 
   gather('component', 'estimate', -time) %>% 
-  mutate(component = factor(component, level = c('predall', constituents)))
+  mutate(component = factor(component, level = c('Estimated', constituents)))
 
+# plot two weeks
 ggplot(toplo, aes(x = time, y = estimate, group = component)) + 
   geom_line() + 
   scale_x_datetime(limits = as.POSIXct(c('2013-07-01', '2013-07-31'))) + 
   facet_wrap(~component, ncol = 1, scales = 'free_y') + 
   theme_bw() 
+```
 
+All tidal components can of course be estimated together.  By default, the tidem function estimates all 69 tidal components. Looking at our constituents of interests shows the same estimated amplitudes in the plot above.
+```{r, message = F, warning = F}
+# estimate all components together
+mod <- tidem(t = datsl)
+
+# get components of interst
+amps <- data.frame(mod@data[c('name', 'amplitude')]) %>% 
+  filter(name %in% constituents) %>% 
+  arrange(amplitude)
+amps
+```
+
+And of course comparing the model predictions with the observed data is always a good idea.
+ 
+```{r, message = F, warning = F, fig.height = 3, fig.width = 8}
+# add predictions to observed data
+dat$Estimated <- predict(mod)
+
+# plot one month
+ggplot(dat, aes(x = datetimestamp, y = depth)) + 
+  geom_point() + 
+  geom_line(aes(y = Estimated), colour = 'blue') + 
+  scale_x_datetime(limits = as.POSIXct(c('2013-07-01', '2013-07-31'))) + 
+  scale_y_continuous(limits = c(0.9, 2)) +
+  theme_bw() 
+```
+
+The fit is not perfect but this could be from several reasons, none of which are directly related to the method - instrument drift, fouling, water movement from non-tidal sources, etc.  The real value of the model is we can use it to fill missing observations in tidal time series or to predict future observations.  We also get reaonable estimates of the main tidal components, i.e., which physical forces are really driving the tide and how large are the contributions.  For example, our data from Apalachicola Bay showed that the tide is driving primarily by the M2, K2, and O1 components, where each had relative amplitudes of about 0.1 meters.  This is consistent with general patterns of micro-tidal systems in the Gulf of Mexico.  Comparing tidal components in other geographic locations would produce very differents results both in the estimated amplitudes and the dominant components.
+
+# TL/DR {#tldr}
+
+Here's how to estimate the tide from an observed time series. The data are from [SWMPr](https://cran.r-project.org/web/packages/SWMPr/index.html) and the tidem model is from [oce](https://cran.r-project.org/web/packages/oce/index.html).
+
+```{r, message = F, warning = F,  fig.height = 3, fig.width = 8}
+library(SWMPr)
+library(oce)
+
+# clean input data, one hour time step, subset, fill gaps
+dat <- qaqc(apadbwq) %>% 
+  setstep(timestep = 60) %>% 
+  subset(., subset = c('2013-01-01 0:0', '2013-12-31 0:0'), select = 'depth') %>% 
+  na.approx(maxgap = 1e6)
+
+# get model
+datsl <- as.sealevel(elevation = dat$depth, time = dat$datetimestamp)
+mod <- tidem(t = datsl)
+
+# add predictions to observed data
+dat$Estimated <- predict(mod)
+
+# plot
+ggplot(dat, aes(x = datetimestamp, y = Estimated)) + 
+  geom_line() +
+  theme_bw() 
 ```
 
 
