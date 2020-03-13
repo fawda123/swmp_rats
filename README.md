@@ -16,5 +16,5 @@ This project contains scripts for processing SWMP data that are used in the widg
 * Run `R\dat_proc.R`, this puts processed data in the `ignore\proc1` and `ignore\proc2` folders, one file per site with all data combined.  Data are processed using functions in SWMPr, specifically retaining records with values of 0, 4, and 5 for QAQC flags.  Data in `ignore\proc1` are at 15 minute steps and data in `ignore\proc2` are daily aggregations.
 * Upload all files in `ignore\proc2` (daily) to the Amazon S3 server at [https://aws.amazon.com/s3/](https://aws.amazon.com/s3/].) (required login id).  The upload bucket is `swmpagg` on Amazon S3 and permissions must be set to allow downloading by editing the bucket policy.
 * Run `R\dat_proc.R` in the `swmp_comp` and `swmp_agg` projects to download and process the updated data from Amazon S3.  This creates files named `data/all_dat.RData` that include the combined data of all sites from the separate daily aggregations data on the server.  Make sure to change the download date in the app descriptions before redeploying.
-* Redeploy each shiny app for all three projects.
+* Redeploy each shiny app for all three projects.  Make sure to use `deployApp(account='beckmw')`, if account is not found use `setAccountInfo("user", "token", "secret")` with info available from the user account.
 

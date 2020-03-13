@@ -190,7 +190,7 @@ summary {
 <li>Run <code>R\dat_proc.R</code>, this puts processed data in the <code>ignore\proc1</code> and <code>ignore\proc2</code> folders, one file per site with all data combined. Data are processed using functions in SWMPr, specifically retaining records with values of 0, 4, and 5 for QAQC flags. Data in <code>ignore\proc1</code> are at 15 minute steps and data in <code>ignore\proc2</code> are daily aggregations.</li>
 <li>Upload all files in <code>ignore\proc2</code> (daily) to the Amazon S3 server at <a href="https://aws.amazon.com/s3/%5D.">https://aws.amazon.com/s3/</a> (required login id). The upload bucket is <code>swmpagg</code> on Amazon S3 and permissions must be set to allow downloading by editing the bucket policy.</li>
 <li>Run <code>R\dat_proc.R</code> in the <code>swmp_comp</code> and <code>swmp_agg</code> projects to download and process the updated data from Amazon S3. This creates files named <code>data/all_dat.RData</code> that include the combined data of all sites from the separate daily aggregations data on the server. Make sure to change the download date in the app descriptions before redeploying.</li>
-<li>Redeploy each shiny app for all three projects.</li>
+<li>Redeploy each shiny app for all three projects. Make sure to use <code>deployApp(account='beckmw')</code>, if account is not found use <code>setAccountInfo("user", "token", "secret")</code> with info available from the user account.</li>
 </ul>
 
 
