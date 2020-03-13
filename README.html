@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
 
 <head>
 
-<meta charset="utf-8">
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta charset="utf-8" />
 <meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
-<meta name="author" content="Marcus W. Beck, beck.marcus@epa.gov" />
+<meta name="author" content="Marcus W. Beck, mbeck@tbep.org" />
 
 
 <title>Data processing for SWMPrats.net</title>
@@ -21,8 +21,8 @@
 <script src="README_files/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
 <script src="README_files/bootstrap-3.3.5/shim/respond.min.js"></script>
 <script src="README_files/navigation-1.1/tabsets.js"></script>
-<link href="README_files/highlightjs-1.1/default.css" rel="stylesheet" />
-<script src="README_files/highlightjs-1.1/highlight.js"></script>
+<link href="README_files/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="README_files/highlightjs-9.12.0/highlight.js"></script>
 
 <style type="text/css">code{white-space: pre;}</style>
 <style type="text/css">
@@ -31,10 +31,12 @@
   }
 </style>
 <script type="text/javascript">
-if (window.hljs && document.readyState && document.readyState === "complete") {
-   window.setTimeout(function() {
-      hljs.initHighlighting();
-   }, 0);
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
 }
 </script>
 
@@ -68,9 +70,7 @@ h6 {
 </style>
 
 
-</head>
 
-<body>
 
 <style type = "text/css">
 .main-container {
@@ -84,30 +84,91 @@ code {
 }
 img {
   max-width:100%;
-  height: auto;
 }
 .tabbed-pane {
   padding-top: 12px;
 }
+.html-widget {
+  margin-bottom: 20px;
+}
 button.code-folding-btn:focus {
   outline: none;
+}
+summary {
+  display: list-item;
 }
 </style>
 
 
 
-<div class="container-fluid main-container">
-
 <!-- tabsets -->
-<script>
-$(document).ready(function () {
-  window.buildTabsets("TOC");
-});
-</script>
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
 
 <!-- code folding -->
 
 
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
 
 
 
@@ -117,15 +178,15 @@ $(document).ready(function () {
 
 
 <h1 class="title toc-ignore">Data processing for SWMPrats.net</h1>
-<h4 class="author"><em>Marcus W. Beck, <a href="mailto:beck.marcus@epa.gov">beck.marcus@epa.gov</a></em></h4>
+<h4 class="author">Marcus W. Beck, <a href="mailto:mbeck@tbep.org" class="email">mbeck@tbep.org</a></h4>
 
 </div>
 
 
 <p>This project contains scripts for processing SWMP data that are used in the widgets on <a href="http://swmprats.net/">swmprats.net</a>. The widgets include <code>swmp_summary</code>, <code>swmp_comp</code>, and <code>swmp_agg</code>. <code>swmp_summary</code> uses one data object per site and the other two widgets use a summarized data object for all sites. Follow these steps to update the data on each app.</p>
 <ul>
-<li>Download most recent data for each site from <a href="http://cdmo.baruch.sc.edu/" class="uri">http://cdmo.baruch.sc.edu/</a>, zip downloads.</li>
-<li>Put all raw csv files for all station/year combos in <code>ignore\raw</code>. Make sure to remove <code>samplingstations.csv</code> and <code>tjrhpnut2002.csv</code> (only two records).</li>
+<li>Download most recent data for each site from <a href="http://cdmo.baruch.sc.edu/">http://cdmo.baruch.sc.edu/</a>, zip downloads.</li>
+<li>Put all raw csv files for all station/year combos in <code>ignore\raw</code>. Make sure to remove <code>samplingstations.csv</code> and <code>tjrhpnut2002.csv</code> (only two records). The downloaded data will include doc and txt files, make sure these are not put in <code>ignore/raw</code>.</li>
 <li>Run <code>R\dat_proc.R</code>, this puts processed data in the <code>ignore\proc1</code> and <code>ignore\proc2</code> folders, one file per site with all data combined. Data are processed using functions in SWMPr, specifically retaining records with values of 0, 4, and 5 for QAQC flags. Data in <code>ignore\proc1</code> are at 15 minute steps and data in <code>ignore\proc2</code> are daily aggregations.</li>
 <li>Upload all files in <code>ignore\proc2</code> (daily) to the Amazon S3 server at <a href="https://aws.amazon.com/s3/%5D.">https://aws.amazon.com/s3/</a> (required login id). The upload bucket is <code>swmpagg</code> on Amazon S3 and permissions must be set to allow downloading by editing the bucket policy.</li>
 <li>Run <code>R\dat_proc.R</code> in the <code>swmp_comp</code> and <code>swmp_agg</code> projects to download and process the updated data from Amazon S3. This creates files named <code>data/all_dat.RData</code> that include the combined data of all sites from the separate daily aggregations data on the server. Make sure to change the download date in the app descriptions before redeploying.</li>
@@ -150,12 +211,29 @@ $(document).ready(function () {
 
 </script>
 
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+
 <!-- dynamically load mathjax for compatibility with self-contained -->
 <script>
   (function () {
     var script = document.createElement("script");
     script.type = "text/javascript";
-    script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
     document.getElementsByTagName("head")[0].appendChild(script);
   })();
 </script>
