@@ -1,13 +1,5 @@
----
-title: 'Data processing for SWMPrats.net'
-author: "Marcus W. Beck, mbeck@tbep.org"
-output:
-  html_document:
-    keep_md: yes
-    self_contained: no
-  pdf_document:
-    toc: yes
----
+
+# Data processing for SWMPrats.net
 
 This project contains scripts for processing SWMP data that are used in the widgets on [swmprats.net](http://swmprats.net/). The widgets include `swmp_summary`, `swmp_comp`, and `swmp_agg`.  `swmp_summary` uses one data object per site and the other two widgets use a summarized data object for all sites.  Follow these steps to update the data on each app. 
 
