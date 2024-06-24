@@ -1,7 +1,6 @@
 ######
 # script for processing swmp data - all reserves, stations, data
-# data retrieved from CDMO Jan. 24, 2017
-# includes all data from 1995 through 2017
+# data retrieved from CDMO Jun. 26th, 2024
 
 ######
 # process stations, 15 minute step and daily aggs
